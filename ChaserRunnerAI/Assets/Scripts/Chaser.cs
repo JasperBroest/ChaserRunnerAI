@@ -1,4 +1,3 @@
-using System.Collections;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -6,9 +5,9 @@ using UnityEngine;
 
 public class Chaser : Agent
 {
-    Runner runner;
-    float maxDistanceSquared = 0f;
-    Vector3 startPos;
+    private Runner runner;
+    private float maxDistanceSquared = 0f;
+    private Vector3 startPos;
 
     protected override void Awake()
     {
@@ -16,34 +15,30 @@ public class Chaser : Agent
         startPos = transform.position;
         base.Awake();
 
-        // 
-        maxDistanceSquared = 25f * 25f + 25f * 25f;
+        maxDistanceSquared = 25f * 25f + 25f * 25f; //Pythagoras
     }
 
-    void Update()
+    private void Move(int actionOutput)
     {
-        Move(Random.Range(0, 2));
-    }
+        switch (actionOutput)
+        {
+            case 0:
+                // Forward
+                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.forward, 1);
+                break;
 
-    private void Move(int random)
-    {
-        if (random == 0)
-        {
-            transform.position = Vector3.Slerp(transform.position,
-            new Vector3(
-                transform.position.x + Random.Range(-0.1f, 0.1f),
-                transform.position.y,
-                transform.position.z
-            ), 1);
-        }
-        else
-        {
-            transform.position = Vector3.Slerp(transform.position,
-            new Vector3(
-                transform.position.x,
-                transform.position.y,
-                transform.position.z + Random.Range(-0.1f, 0.1f)
-                ), 1);
+            case 1:
+                // Right
+                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.right, 1);
+                break;
+            case 2:
+                // Left
+                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.left, 1);
+                break;
+            case 3:
+                // Back
+                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.back, 1);
+                break;
         }
     }
 
@@ -60,7 +55,7 @@ public class Chaser : Agent
         ActionSegment<float> continuousActions = actions.ContinuousActions;
         if (!continuousActions.IsEmpty())
         {
-            print(continuousActions[0]);
+            UIMenu.Instance.Output(continuousActions[0].ToString());
             Move((int)continuousActions[0]);
         }
 
