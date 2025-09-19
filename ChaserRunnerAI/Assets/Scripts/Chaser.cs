@@ -9,37 +9,59 @@ public class Chaser : Agent
     private float maxDistanceSquared = 0f;
     private Vector3 startPos;
 
+    Transform runnerTransform;
+
+
+    private Rigidbody rb;
+    public float moveSpeed = 5f;
+    
     protected override void Awake()
     {
         runner = FindFirstObjectByType<Runner>();
+        rb = GetComponent<Rigidbody>();
+
         startPos = transform.position;
         base.Awake();
 
-        maxDistanceSquared = 25f * 25f + 25f * 25f; //Pythagoras
+        maxDistanceSquared = 12f * 12f + 12 * 12; //Pythagoras
+    }
+    public override void OnEpisodeBegin()
+    {
+        base.OnEpisodeBegin();
     }
 
-    private void Move(int actionOutput)
+    private void Update()
     {
-        switch (actionOutput)
-        {
-            case 0:
-                // Forward
-                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.forward, 1);
-                break;
+        //var rayOutputs = GetComponent<RayPerceptionSensorComponent3D>().m_RaySensor.RayPerceptionOutput.RayOutputs;
 
-            case 1:
-                // Right
-                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.right, 1);
-                break;
-            case 2:
-                // Left
-                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.left, 1);
-                break;
-            case 3:
-                // Back
-                transform.position = Vector3.Slerp(transform.position, transform.position + Vector3.back, 1);
-                break;
+        //foreach (RayPerceptionOutput.RayOutput output in rayOutputs)
+        //{
+        //    if (output.HitGameObject.CompareTag("Runner"))
+        //    {
+        //        Debug.Log($"Object = {output.HitGameObject.transform.position} END");
+        //        runnerTransform = output.HitGameObject.transform;
+        //    }
+        //    else
+        //    {
+        //        Debug.Log("No runner found");
+        //    }
+        //}
+    }
+
+    private void Move(Vector2 direction)
+    {
+        Vector3 movement;
+        if (runnerTransform != null)
+        {
+            movement = (transform.position - runnerTransform.position).normalized;
+
         }
+        else
+        {
+            movement = new Vector3(direction.x, 0f, direction.y) * moveSpeed;
+        }
+
+        rb.MovePosition(rb.position + movement * Time.fixedDeltaTime);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -47,6 +69,11 @@ public class Chaser : Agent
         float currentDistance = Vector3.SqrMagnitude(runner.transform.position - transform.position); // SQUARED!
         sensor.AddObservation(currentDistance / maxDistanceSquared); // Always between 0 and 1.
         base.CollectObservations(sensor);
+
+        // Observations:
+        // 1. Distance to runner
+        // 2. Raycast to see if runner is in line of sight
+
     }
 
     // Komt uiteindelijk vanuit Python
@@ -55,16 +82,10 @@ public class Chaser : Agent
         ActionSegment<float> continuousActions = actions.ContinuousActions;
         if (!continuousActions.IsEmpty())
         {
-            UIMenu.Instance.Output(continuousActions[0].ToString());
-            Move((int)continuousActions[0]);
+            Move(new Vector2(continuousActions[0], continuousActions[1]));
         }
 
         AddReward(0.1f);
     }
 
-    public override void OnEpisodeBegin()
-    {
-        base.OnEpisodeBegin();
-        transform.position = startPos;
-    }
 }
