@@ -63,7 +63,7 @@ def select_action(state):
 # This is a non-blocking call that only loads the environment.
 build_path = "C:\\Users\\japse\\Unity Projects\\ChaserRunnerAI\\ChaserRunnerAI\\Builds\\ChaserRunnerAI.exe"
 engine_config_channel = EngineConfigurationChannel()
-time_scale = 10
+time_scale = 5
 engine_config_channel.set_configuration_parameters(600, 600, 1, time_scale, -1)
 env = UnityEnvironment(file_name=build_path, seed=1, side_channels=[engine_config_channel])
 
@@ -83,12 +83,13 @@ if __name__ == "__main__":
             decision_steps, terminal_steps = env.get_steps(behavior_name)
             agent_id = list(decision_steps.agent_id)[0]
             obs = decision_steps.obs[0][0]  # shape (1,)
-            
+
             # Get action from NN
             action = select_action(obs)
 
             # Send action to Unity
             action_tuple = ActionTuple(continuous=action.reshape(1,2))
+
             env.set_action_for_agent(behavior_name, agent_id, action_tuple)
             env.step()
 

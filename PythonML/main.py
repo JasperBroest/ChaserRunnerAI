@@ -11,7 +11,7 @@ import torch.optim as optim
 from torch.distributions import Categorical
 
 class Actor(nn.Module):
-    def __init__(self, in_features=33, hidden_layer_1_size=256, hidden_layer_2_size=128, out_features=4):   # 4 out features because it outputs probabilities not raw x or y values
+    def __init__(self, in_features=99, hidden_layer_1_size=256, hidden_layer_2_size=128, out_features=4):   # 4 out features because it outputs probabilities not raw x or y values
         super().__init__() 
         self.fc1 = nn.Linear(in_features, hidden_layer_1_size)
         self.fc2 = nn.Linear(hidden_layer_1_size, hidden_layer_2_size)
@@ -29,7 +29,7 @@ class Actor(nn.Module):
         return x
     
 class Critic(nn.Module):
-    def __init__(self, in_features=33, hidden_layer_1_size=128, hidden_layer_2_size=256, out_features=1):
+    def __init__(self, in_features=99, hidden_layer_1_size=128, hidden_layer_2_size=256, out_features=1):
         super().__init__() 
         self.fc1 = nn.Linear(in_features, hidden_layer_1_size)
         self.fc2 = nn.Linear(hidden_layer_1_size, hidden_layer_2_size)
@@ -75,7 +75,7 @@ behavior_name = list(env.behavior_specs.keys())[0]
 
 if __name__ == "__main__":
 
-    for episode in range(5000):
+    for episode in range(10000):
         env.reset()
         done = False
         total_reward = 0
@@ -86,6 +86,7 @@ if __name__ == "__main__":
             decision_steps, terminal_steps = env.get_steps(behavior_name)   # Info about agents that need action and that finished their episode
             agent_id = list(decision_steps.agent_id)[0] # Select 1st and only agent
             obs = decision_steps.obs[0][0]  # Select observations from first agent
+            #print(obs)
             
             action, log_prob = select_action(obs)
             log_probs.append(log_prob)
@@ -122,7 +123,6 @@ if __name__ == "__main__":
                 critic_loss.backward()
                 critic_optimizer.step()
 
-
                 log_prob = log_probs[-1]  # get the log-prob of the last action
                 actor_loss = -log_prob * td_error.detach().squeeze()    # detach to prevent backprop through critic
 
@@ -133,9 +133,10 @@ if __name__ == "__main__":
 
             else:
                 reward = next_decision_steps[agent_id].reward
+                # print("We took action " + str(action) + " and got reward " + str(reward))
                 next_obs = next_decision_steps.obs[0][0]
             total_reward += reward
 
-        print(f"Episode {episode} done, total reward={total_reward}")
+        print(f"Episode {episode} done, total reward={round(total_reward, 2)}")
     
     env.close()

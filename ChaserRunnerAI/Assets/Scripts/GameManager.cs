@@ -23,8 +23,8 @@ public class GameManager : MonoBehaviour
     {
         
 
-        chaser.transform.position = GenerateRandomPosition();
-        runner.transform.position = GenerateRunnerPosition();
+        chaser.transform.position = new Vector3(9.5f, 0, 0.5f);
+        runner.transform.position = new Vector3(-9.5f, 0, -1.5f);
     }
 
     private Vector3 GenerateRandomPosition()
