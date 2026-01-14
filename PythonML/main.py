@@ -48,8 +48,8 @@ class Critic(nn.Module):
 actor = Actor()
 critic = Critic()
 
-actor_optimizer = optim.Adam(actor.parameters(), lr=0.0001) # Verantwoordelijk voor het bijstellen van de weights (hoe sterk etc.)
-critic_optimizer = optim.Adam(critic.parameters(), lr=0.0001) # Verantwoordelijk voor het bijstellen van de weights (hoe sterk etc.)
+actor_optimizer = optim.Adam(actor.parameters(), lr=0.001) # Verantwoordelijk voor het bijstellen van de weights (hoe sterk etc.)
+critic_optimizer = optim.Adam(critic.parameters(), lr=0.001) # Verantwoordelijk voor het bijstellen van de weights (hoe sterk etc.)
 
 # Passes a state through actor and returns a discrete action based on the actor's probabilities
 def select_action(state):

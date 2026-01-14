@@ -67,7 +67,7 @@ time_scale = 5
 engine_config_channel.set_configuration_parameters(600, 600, 1, time_scale, -1)
 env = UnityEnvironment(file_name=build_path, seed=1, side_channels=[engine_config_channel])
 
-# Start interacting with the environment.
+#Start interacting with the environment.
 env.reset()
 behavior_name = list(env.behavior_specs.keys())[0] 
 
@@ -108,7 +108,7 @@ if __name__ == "__main__":
             # Store experience
             buffer.add(obs, action, reward, next_obs, done)
 
-        # --- Training step after each episode ---
+        # Training step after each episode
         if len(buffer) > 0:
             obs_batch, actions_batch, rewards_batch, _, _ = buffer.sample_all()
             obs_tensor = torch.from_numpy(obs_batch).float()
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
             optimizer.zero_grad()
             pred_actions = model(obs_tensor)  # Als ik alles nog eens zou doen (met dezelfde observations!), dan zou ik deze actions doen.
-            loss = F.mse_loss(pred_actions, actions_tensor, reduction='none')  # vergelijk deze met elkaar...
+            loss = F.mse_loss(pred_actions, actions_tensor, reduction='none')  # vergelijk deze met elkaar
             loss = (loss.sum(dim=1) * rewards_tensor).mean()  # weight by reward!
             loss.backward()
             optimizer.step()
