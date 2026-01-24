@@ -55,11 +55,12 @@ public class Chaser : Agent
         rb.MovePosition(rb.position + movement * Time.fixedDeltaTime);
     }
 
+    // Sent observations to python
     public override void CollectObservations(VectorSensor sensor)
     {
         ShootRaycasts();
 
-        float currentDistance = Vector3.SqrMagnitude(runner.transform.position - transform.position); // SQUARED!
+        float currentDistance = Vector3.SqrMagnitude(runner.transform.position - transform.position);
         sensor.AddObservation(currentDistance / maxDistanceSquared); // Always between 0 and 1.
 
         Vector3 dirToRunner = (runner.transform.position - transform.position).normalized;
@@ -74,7 +75,9 @@ public class Chaser : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // Receive action from python
         int direction = actions.DiscreteActions[0];
+
         desiredDirection = DiscreteActionToDirection(direction);
 
         Vector3 optimalDirection = (runner.transform.position - transform.position).normalized;
@@ -83,10 +86,8 @@ public class Chaser : Agent
         angle = 1.0f - angle; // Always between 0 and 1 where 1 is best and 0 is worst.
         
         distance = Vector3.Distance(transform.position, runner.transform.position);
-        //float distanceDifference = previousDistance - distance;
 
         // Small step reward proportional to improvement
-        //float stepReward = Mathf.Clamp(distanceDifference * 1.5f, -0.01f, 0.03f);
         float stepReward = Map(angle, 0f, 1f, -0.01f, 0.03f);
 
         AddReward(stepReward);

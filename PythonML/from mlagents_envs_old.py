@@ -80,6 +80,7 @@ if __name__ == "__main__":
         done = False
         total_reward = 0
         while not done:
+            # Get obs from unity agent
             decision_steps, terminal_steps = env.get_steps(behavior_name)
             agent_id = list(decision_steps.agent_id)[0]
             obs = decision_steps.obs[0][0]  # shape (1,)
